@@ -7,6 +7,22 @@ const productsContainer = document.querySelector(
     "#products-container"
 );
 
+const formTitle = document.querySelector("#form-title");
+const submitButton = document.querySelector("#submit-button");
+const cancelEditButton = document.querySelector(
+    "#cancel-edit-button"
+);
+
+const nameInput = document.querySelector("#product-name");
+const categoryInput = document.querySelector(
+    "#product-category"
+);
+const priceInput = document.querySelector("#product-price");
+const stockInput = document.querySelector("#product-stock");
+
+let editingProductId = null;
+let messageTimer = null;
+
 function getProducts() {
     const storedProducts = localStorage.getItem(STORAGE_KEY);
 
@@ -55,10 +71,12 @@ function createProductId() {
 }
 
 function showMessage(message, type) {
+    window.clearTimeout(messageTimer);
+
     formMessage.textContent = message;
     formMessage.className = `form-message ${type}`;
 
-    window.setTimeout(() => {
+    messageTimer = window.setTimeout(() => {
         formMessage.textContent = "";
         formMessage.className = "form-message";
     }, 3500);
@@ -113,6 +131,7 @@ function createEmptyState() {
 function createProductCard(product) {
     const article = document.createElement("article");
     article.className = "product-card";
+    article.dataset.productId = product.id;
 
     const header = document.createElement("div");
     header.className = "product-card-header";
@@ -123,11 +142,11 @@ function createProductCard(product) {
     const productIcon = document.createElement("div");
     productIcon.className = "product-icon";
 
-    const firstLetter = String(product.name || "P")
+    productIcon.textContent = String(
+        product.name || "P"
+    )
         .charAt(0)
         .toUpperCase();
-
-    productIcon.textContent = firstLetter;
 
     const productInformation = document.createElement("div");
 
@@ -150,9 +169,9 @@ function createProductCard(product) {
         productInformation
     );
 
-    const stockStatus = document.createElement("span");
-
     const stock = Number(product.stock) || 0;
+
+    const stockStatus = document.createElement("span");
 
     stockStatus.className =
         stock > 0
@@ -207,15 +226,33 @@ function createProductCard(product) {
         stockDetail
     );
 
+    const actions = document.createElement("div");
+    actions.className = "product-actions";
+
+    const editButton = document.createElement("button");
+    editButton.type = "button";
+    editButton.className = "edit-button";
+    editButton.dataset.action = "edit";
+    editButton.dataset.productId = product.id;
+    editButton.textContent = "Editar producto";
+
+    actions.append(editButton);
+
     const footer = document.createElement("div");
     footer.className = "product-card-footer";
 
-    footer.textContent =
-        `Registrado el ${formatDate(product.createdAt)}`;
+    if (product.updatedAt) {
+        footer.textContent =
+            `Actualizado el ${formatDate(product.updatedAt)}`;
+    } else {
+        footer.textContent =
+            `Registrado el ${formatDate(product.createdAt)}`;
+    }
 
     article.append(
         header,
         details,
+        actions,
         footer
     );
 
@@ -241,31 +278,15 @@ function renderProducts() {
     productsGrid.className = "products-grid";
 
     products.forEach((product) => {
-        const productCard = createProductCard(product);
-
-        productsGrid.append(productCard);
+        productsGrid.append(
+            createProductCard(product)
+        );
     });
 
     productsContainer.append(productsGrid);
 }
 
 function getFormValues() {
-    const nameInput = document.querySelector(
-        "#product-name"
-    );
-
-    const categoryInput = document.querySelector(
-        "#product-category"
-    );
-
-    const priceInput = document.querySelector(
-        "#product-price"
-    );
-
-    const stockInput = document.querySelector(
-        "#product-stock"
-    );
-
     return {
         name: nameInput.value.trim(),
         category: categoryInput.value,
@@ -297,6 +318,121 @@ function isProductValid(product) {
     );
 }
 
+function enterEditMode(productId) {
+    const products = getProducts();
+
+    const product = products.find(
+        (item) => item.id === productId
+    );
+
+    if (!product) {
+        showMessage(
+            "No fue posible encontrar el producto.",
+            "error"
+        );
+
+        return;
+    }
+
+    editingProductId = product.id;
+
+    nameInput.value = product.name;
+    categoryInput.value = product.category;
+    priceInput.value = product.price;
+    stockInput.value = product.stock;
+
+    formTitle.textContent = "Editar producto";
+    submitButton.textContent = "Guardar cambios";
+    cancelEditButton.hidden = false;
+
+    productForm.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+    });
+
+    nameInput.focus();
+
+    showMessage(
+        "Modifica los datos y guarda los cambios.",
+        "success"
+    );
+}
+
+function exitEditMode() {
+    editingProductId = null;
+
+    productForm.reset();
+
+    formTitle.textContent = "Agregar producto";
+    submitButton.textContent = "Registrar producto";
+    cancelEditButton.hidden = true;
+}
+
+function createProduct(formValues) {
+    const products = getProducts();
+
+    const newProduct = {
+        id: createProductId(),
+        name: formValues.name,
+        category: formValues.category,
+        price: formValues.price,
+        stock: formValues.stock,
+        createdAt: new Date().toISOString()
+    };
+
+    products.push(newProduct);
+
+    saveProducts(products);
+
+    productForm.reset();
+
+    renderProducts();
+
+    showMessage(
+        "Producto registrado correctamente.",
+        "success"
+    );
+}
+
+function updateProduct(formValues) {
+    const products = getProducts();
+
+    const productIndex = products.findIndex(
+        (product) => product.id === editingProductId
+    );
+
+    if (productIndex === -1) {
+        showMessage(
+            "No fue posible actualizar el producto.",
+            "error"
+        );
+
+        exitEditMode();
+
+        return;
+    }
+
+    products[productIndex] = {
+        ...products[productIndex],
+        name: formValues.name,
+        category: formValues.category,
+        price: formValues.price,
+        stock: formValues.stock,
+        updatedAt: new Date().toISOString()
+    };
+
+    saveProducts(products);
+
+    exitEditMode();
+
+    renderProducts();
+
+    showMessage(
+        "Producto actualizado correctamente.",
+        "success"
+    );
+}
+
 productForm.addEventListener(
     "submit",
     (event) => {
@@ -313,27 +449,37 @@ productForm.addEventListener(
             return;
         }
 
-        const newProduct = {
-            id: createProductId(),
-            name: formValues.name,
-            category: formValues.category,
-            price: formValues.price,
-            stock: formValues.stock,
-            createdAt: new Date().toISOString()
-        };
+        if (editingProductId) {
+            updateProduct(formValues);
+            return;
+        }
 
-        const products = getProducts();
+        createProduct(formValues);
+    }
+);
 
-        products.push(newProduct);
+productsContainer.addEventListener(
+    "click",
+    (event) => {
+        const editButton = event.target.closest(
+            "[data-action='edit']"
+        );
 
-        saveProducts(products);
+        if (!editButton) {
+            return;
+        }
 
-        productForm.reset();
+        enterEditMode(editButton.dataset.productId);
+    }
+);
 
-        renderProducts();
+cancelEditButton.addEventListener(
+    "click",
+    () => {
+        exitEditMode();
 
         showMessage(
-            "Producto registrado correctamente.",
+            "Edición cancelada.",
             "success"
         );
     }

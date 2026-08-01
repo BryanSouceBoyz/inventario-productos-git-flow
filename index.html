@@ -65,10 +65,12 @@
                 <div class="panel-heading">
                     <div>
                         <span class="section-label">
-                            Nuevo registro
+                            Gestión de productos
                         </span>
 
-                        <h3>Agregar producto</h3>
+                        <h3 id="form-title">
+                            Agregar producto
+                        </h3>
                     </div>
 
                     <span
@@ -163,12 +165,24 @@
                         </div>
                     </div>
 
-                    <button
-                        type="submit"
-                        class="primary-button"
-                    >
-                        Registrar producto
-                    </button>
+                    <div class="form-actions">
+                        <button
+                            type="submit"
+                            id="submit-button"
+                            class="primary-button"
+                        >
+                            Registrar producto
+                        </button>
+
+                        <button
+                            type="button"
+                            id="cancel-edit-button"
+                            class="secondary-button"
+                            hidden
+                        >
+                            Cancelar edición
+                        </button>
+                    </div>
 
                     <p
                         id="form-message"
