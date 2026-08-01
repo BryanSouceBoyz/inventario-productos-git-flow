@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="description"
+        content="Sistema CRUD para la gestión de productos de un inventario."
+    >
+
+    <title>InventoryFlow | Gestión de productos</title>
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-icon">IF</div>
+
+            <div>
+                <h1>InventoryFlow</h1>
+                <p>Gestión inteligente de inventario</p>
+            </div>
+        </div>
+
+        <div class="branch-badge">
+            Git Flow Project
+        </div>
+    </header>
+
+    <main class="main-container">
+        <section class="hero">
+            <div>
+                <span class="eyebrow">Panel administrativo</span>
+
+                <h2>Controla tus productos desde un solo lugar</h2>
+
+                <p>
+                    Registra y administra los productos disponibles
+                    en el inventario de forma rápida y organizada.
+                </p>
+            </div>
+
+            <article class="summary-card">
+                <span>Productos registrados</span>
+                <strong id="total-products">0</strong>
+                <small>Guardados localmente</small>
+            </article>
+        </section>
+
+        <section class="content-grid">
+            <article class="panel form-panel">
+                <div class="panel-heading">
+                    <div>
+                        <span class="section-label">Nuevo registro</span>
+                        <h3>Agregar producto</h3>
+                    </div>
+
+                    <span class="status-dot"></span>
+                </div>
+
+                <form id="product-form" novalidate>
+                    <div class="form-group">
+                        <label for="product-name">
+                            Nombre del producto
+                        </label>
+
+                        <input
+                            type="text"
+                            id="product-name"
+                            name="productName"
+                            placeholder="Ej.: Laptop Lenovo LOQ"
+                            required
+                            maxlength="80"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="product-category">
+                            Categoría
+                        </label>
+
+                        <select
+                            id="product-category"
+                            name="productCategory"
+                            required
+                        >
+                            <option value="">Selecciona una categoría</option>
+                            <option value="Tecnología">Tecnología</option>
+                            <option value="Hogar">Hogar</option>
+                            <option value="Oficina">Oficina</option>
+                            <option value="Alimentos">Alimentos</option>
+                            <option value="Otros">Otros</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="product-price">
+                                Precio
+                            </label>
+
+                            <input
+                                type="number"
+                                id="product-price"
+                                name="productPrice"
+                                placeholder="0.00"
+                                min="0"
+                                step="0.01"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="product-stock">
+                                Existencias
+                            </label>
+
+                            <input
+                                type="number"
+                                id="product-stock"
+                                name="productStock"
+                                placeholder="0"
+                                min="0"
+                                step="1"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <button type="submit" class="primary-button">
+                        Registrar producto
+                    </button>
+
+                    <p
+                        id="form-message"
+                        class="form-message"
+                        aria-live="polite"
+                    ></p>
+                </form>
+            </article>
+
+            <article class="panel preview-panel">
+                <div class="panel-heading">
+                    <div>
+                        <span class="section-label">Inventario</span>
+                        <h3>Productos registrados</h3>
+                    </div>
+                </div>
+
+                <div class="empty-state">
+                    <div class="empty-icon">📦</div>
+
+                    <h4>Área de productos</h4>
+
+                    <p>
+                        Los productos almacenados se mostrarán aquí
+                        en la próxima funcionalidad del proyecto.
+                    </p>
+                </div>
+            </article>
+        </section>
+    </main>
+
+    <footer>
+        <p>
+            InventoryFlow · Proyecto académico de Git y Git Flow
+        </p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
