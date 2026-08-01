@@ -1,5 +1,16 @@
 const STORAGE_KEY = "inventoryflow-products";
 
+const VALID_CATEGORIES = [
+    "Tecnología",
+    "Hogar",
+    "Oficina",
+    "Alimentos",
+    "Otros"
+];
+
+const MAX_PRICE = 10000000;
+const MAX_STOCK = 1000000;
+
 const productForm = document.querySelector("#product-form");
 const totalProducts = document.querySelector("#total-products");
 const formMessage = document.querySelector("#form-message");
@@ -79,7 +90,7 @@ function showMessage(message, type) {
     messageTimer = window.setTimeout(() => {
         formMessage.textContent = "";
         formMessage.className = "form-message";
-    }, 3500);
+    }, 4500);
 }
 
 function formatCurrency(value) {
@@ -102,6 +113,15 @@ function formatDate(dateValue) {
         month: "short",
         year: "numeric"
     }).format(date);
+}
+
+function normalizeProductName(name) {
+    return name
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLowerCase();
 }
 
 function createEmptyState() {
@@ -273,7 +293,6 @@ function renderProducts() {
     const products = getProducts();
 
     productsContainer.replaceChildren();
-
     updateProductCounter(products);
 
     if (products.length === 0) {
@@ -298,34 +317,83 @@ function renderProducts() {
 
 function getFormValues() {
     return {
-        name: nameInput.value.trim(),
+        name: nameInput.value
+            .replace(/\s+/g, " ")
+            .trim(),
         category: categoryInput.value,
         price: Number(priceInput.value),
         stock: Number(stockInput.value)
     };
 }
 
-function isProductValid(product) {
-    const hasValidName =
-        product.name.length > 0;
+function validateProduct(
+    product,
+    products,
+    ignoredProductId = null
+) {
+    if (!product.name) {
+        return "El nombre del producto es obligatorio.";
+    }
 
-    const hasValidCategory =
-        product.category.length > 0;
+    if (product.name.length < 3) {
+        return "El nombre debe tener al menos 3 caracteres.";
+    }
 
-    const hasValidPrice =
-        Number.isFinite(product.price) &&
-        product.price >= 0;
+    if (product.name.length > 80) {
+        return "El nombre no puede superar los 80 caracteres.";
+    }
 
-    const hasValidStock =
-        Number.isInteger(product.stock) &&
-        product.stock >= 0;
+    if (!VALID_CATEGORIES.includes(product.category)) {
+        return "Selecciona una categoría válida.";
+    }
 
-    return (
-        hasValidName &&
-        hasValidCategory &&
-        hasValidPrice &&
-        hasValidStock
+    if (!Number.isFinite(product.price)) {
+        return "Introduce un precio válido.";
+    }
+
+    if (product.price <= 0) {
+        return "El precio debe ser mayor que cero.";
+    }
+
+    if (product.price > MAX_PRICE) {
+        return "El precio supera el límite permitido.";
+    }
+
+    if (!Number.isInteger(product.stock)) {
+        return "Las existencias deben ser un número entero.";
+    }
+
+    if (product.stock < 0) {
+        return "Las existencias no pueden ser negativas.";
+    }
+
+    if (product.stock > MAX_STOCK) {
+        return "Las existencias superan el límite permitido.";
+    }
+
+    const normalizedName = normalizeProductName(
+        product.name
     );
+
+    const duplicatedProduct = products.some(
+        (storedProduct) => {
+            const isSameProduct =
+                storedProduct.id === ignoredProductId;
+
+            const hasSameName =
+                normalizeProductName(
+                    storedProduct.name || ""
+                ) === normalizedName;
+
+            return !isSameProduct && hasSameName;
+        }
+    );
+
+    if (duplicatedProduct) {
+        return "Ya existe un producto con ese nombre.";
+    }
+
+    return null;
 }
 
 function enterEditMode(productId) {
@@ -378,9 +446,7 @@ function exitEditMode() {
     cancelEditButton.hidden = true;
 }
 
-function createProduct(formValues) {
-    const products = getProducts();
-
+function createProduct(formValues, products) {
     const newProduct = {
         id: createProductId(),
         name: formValues.name,
@@ -393,9 +459,7 @@ function createProduct(formValues) {
     products.push(newProduct);
 
     saveProducts(products);
-
     productForm.reset();
-
     renderProducts();
 
     showMessage(
@@ -404,9 +468,7 @@ function createProduct(formValues) {
     );
 }
 
-function updateProduct(formValues) {
-    const products = getProducts();
-
+function updateProduct(formValues, products) {
     const productIndex = products.findIndex(
         (product) => product.id === editingProductId
     );
@@ -432,9 +494,7 @@ function updateProduct(formValues) {
     };
 
     saveProducts(products);
-
     exitEditMode();
-
     renderProducts();
 
     showMessage(
@@ -492,10 +552,17 @@ productForm.addEventListener(
         event.preventDefault();
 
         const formValues = getFormValues();
+        const products = getProducts();
 
-        if (!isProductValid(formValues)) {
+        const validationError = validateProduct(
+            formValues,
+            products,
+            editingProductId
+        );
+
+        if (validationError) {
             showMessage(
-                "Completa correctamente todos los campos.",
+                validationError,
                 "error"
             );
 
@@ -503,11 +570,18 @@ productForm.addEventListener(
         }
 
         if (editingProductId) {
-            updateProduct(formValues);
+            updateProduct(
+                formValues,
+                products
+            );
+
             return;
         }
 
-        createProduct(formValues);
+        createProduct(
+            formValues,
+            products
+        );
     }
 );
 
