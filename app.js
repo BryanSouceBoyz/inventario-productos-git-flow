@@ -234,9 +234,19 @@ function createProductCard(product) {
     editButton.className = "edit-button";
     editButton.dataset.action = "edit";
     editButton.dataset.productId = product.id;
-    editButton.textContent = "Editar producto";
+    editButton.textContent = "Editar";
 
-    actions.append(editButton);
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "delete-button";
+    deleteButton.dataset.action = "delete";
+    deleteButton.dataset.productId = product.id;
+    deleteButton.textContent = "Eliminar";
+
+    actions.append(
+        editButton,
+        deleteButton
+    );
 
     const footer = document.createElement("div");
     footer.className = "product-card-footer";
@@ -433,6 +443,49 @@ function updateProduct(formValues) {
     );
 }
 
+function deleteProduct(productId) {
+    const products = getProducts();
+
+    const product = products.find(
+        (item) => item.id === productId
+    );
+
+    if (!product) {
+        showMessage(
+            "No fue posible encontrar el producto.",
+            "error"
+        );
+
+        return;
+    }
+
+    const confirmed = window.confirm(
+        `¿Deseas eliminar "${product.name}"?\n\n` +
+        "Esta acción no se puede deshacer."
+    );
+
+    if (!confirmed) {
+        return;
+    }
+
+    const remainingProducts = products.filter(
+        (item) => item.id !== productId
+    );
+
+    saveProducts(remainingProducts);
+
+    if (editingProductId === productId) {
+        exitEditMode();
+    }
+
+    renderProducts();
+
+    showMessage(
+        "Producto eliminado correctamente.",
+        "success"
+    );
+}
+
 productForm.addEventListener(
     "submit",
     (event) => {
@@ -461,15 +514,25 @@ productForm.addEventListener(
 productsContainer.addEventListener(
     "click",
     (event) => {
-        const editButton = event.target.closest(
-            "[data-action='edit']"
+        const actionButton = event.target.closest(
+            "[data-action]"
         );
 
-        if (!editButton) {
+        if (!actionButton) {
             return;
         }
 
-        enterEditMode(editButton.dataset.productId);
+        const action = actionButton.dataset.action;
+        const productId = actionButton.dataset.productId;
+
+        if (action === "edit") {
+            enterEditMode(productId);
+            return;
+        }
+
+        if (action === "delete") {
+            deleteProduct(productId);
+        }
     }
 );
 
