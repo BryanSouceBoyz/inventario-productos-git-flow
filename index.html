@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
@@ -36,9 +37,13 @@
     <main class="main-container">
         <section class="hero">
             <div>
-                <span class="eyebrow">Panel administrativo</span>
+                <span class="eyebrow">
+                    Panel administrativo
+                </span>
 
-                <h2>Controla tus productos desde un solo lugar</h2>
+                <h2>
+                    Controla tus productos desde un solo lugar
+                </h2>
 
                 <p>
                     Registra y administra los productos disponibles
@@ -48,7 +53,9 @@
 
             <article class="summary-card">
                 <span>Productos registrados</span>
+
                 <strong id="total-products">0</strong>
+
                 <small>Guardados localmente</small>
             </article>
         </section>
@@ -57,11 +64,17 @@
             <article class="panel form-panel">
                 <div class="panel-heading">
                     <div>
-                        <span class="section-label">Nuevo registro</span>
+                        <span class="section-label">
+                            Nuevo registro
+                        </span>
+
                         <h3>Agregar producto</h3>
                     </div>
 
-                    <span class="status-dot"></span>
+                    <span
+                        class="status-dot"
+                        aria-label="Sistema disponible"
+                    ></span>
                 </div>
 
                 <form id="product-form" novalidate>
@@ -90,12 +103,29 @@
                             name="productCategory"
                             required
                         >
-                            <option value="">Selecciona una categoría</option>
-                            <option value="Tecnología">Tecnología</option>
-                            <option value="Hogar">Hogar</option>
-                            <option value="Oficina">Oficina</option>
-                            <option value="Alimentos">Alimentos</option>
-                            <option value="Otros">Otros</option>
+                            <option value="">
+                                Selecciona una categoría
+                            </option>
+
+                            <option value="Tecnología">
+                                Tecnología
+                            </option>
+
+                            <option value="Hogar">
+                                Hogar
+                            </option>
+
+                            <option value="Oficina">
+                                Oficina
+                            </option>
+
+                            <option value="Alimentos">
+                                Alimentos
+                            </option>
+
+                            <option value="Otros">
+                                Otros
+                            </option>
                         </select>
                     </div>
 
@@ -133,7 +163,10 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="primary-button">
+                    <button
+                        type="submit"
+                        class="primary-button"
+                    >
                         Registrar producto
                     </button>
 
@@ -148,20 +181,29 @@
             <article class="panel preview-panel">
                 <div class="panel-heading">
                     <div>
-                        <span class="section-label">Inventario</span>
+                        <span class="section-label">
+                            Inventario
+                        </span>
+
                         <h3>Productos registrados</h3>
                     </div>
                 </div>
 
-                <div class="empty-state">
-                    <div class="empty-icon">📦</div>
+                <div
+                    id="products-container"
+                    class="products-container"
+                    aria-live="polite"
+                >
+                    <div class="empty-state">
+                        <div class="empty-icon">📦</div>
 
-                    <h4>Área de productos</h4>
+                        <h4>No hay productos registrados</h4>
 
-                    <p>
-                        Los productos almacenados se mostrarán aquí
-                        en la próxima funcionalidad del proyecto.
-                    </p>
+                        <p>
+                            Utiliza el formulario para agregar el
+                            primer producto al inventario.
+                        </p>
+                    </div>
                 </div>
             </article>
         </section>
